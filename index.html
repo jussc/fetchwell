@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fetchwell — pet product finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEEE3; --paper-raised:#F5F5EC; --ink:#22281E; --ink-soft:#4B5245;
+    --line:#D6D4C3; --ochre:#D9A62E; --ochre-dark:#8A5F13;
+    --clay:#B96A48; --clay-dark:#6E3A24; --pine:#2F4A3D; --danger:#A32D2D;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Work Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 32px 80px;}
+  h1,h2,h3{font-family:'Newsreader',serif;font-weight:500;margin:0;}
+  a{color:inherit;}
+  button{font-family:'Work Sans',sans-serif;}
+
+  nav{display:flex;align-items:center;justify-content:space-between;padding:28px 0 24px;border-bottom:1px solid var(--line);}
+  .wordmark{font-family:'Newsreader',serif;font-style:italic;font-weight:500;font-size:22px;}
+  .navlinks{display:flex;gap:28px;font-size:14px;color:var(--ink-soft);}
+
+  .hero{padding:56px 0 44px;border-bottom:1px solid var(--line);}
+  .hero h1{font-size:40px;line-height:1.15;max-width:14ch;letter-spacing:-0.3px;}
+  .hero p{font-size:16px;line-height:1.6;color:var(--ink-soft);max-width:46ch;margin:18px 0 26px;}
+  .cta-primary{
+    display:inline-flex;align-items:center;gap:10px;background:var(--pine);color:var(--paper-raised);
+    font-size:15px;font-weight:500;padding:14px 22px;border-radius:2px;border:none;cursor:pointer;
+  }
+  .cta-primary:hover{background:#243B31;}
+
+  .quiz-section, .results-section{padding:48px 0;}
+  .quiz-section{border-bottom:1px solid var(--line);}
+  .eyebrow-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap;}
+  .eyebrow-row h2{font-size:24px;}
+  .step-count{font-size:13px;color:var(--ink-soft);white-space:nowrap;}
+
+  .quiz-card{background:var(--paper-raised);border:1px solid var(--line);padding:30px;}
+  .quiz-q{font-size:18px;margin-bottom:16px;font-family:'Newsreader',serif;}
+  .options{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
+  .opt{border:1px solid var(--line);padding:13px 14px;font-size:14px;cursor:pointer;background:var(--paper);transition:border-color .12s,background .12s;user-select:none;}
+  .opt:hover{border-color:var(--ochre-dark);}
+  .opt.selected{border-color:var(--ochre-dark);background:#F7EAC9;}
+  .error-msg{font-size:13px;color:var(--danger);margin-top:12px;display:none;}
+  .error-msg.show{display:block;}
+
+  .quiz-footer{display:flex;justify-content:space-between;align-items:center;margin-top:24px;}
+  .dots{display:flex;gap:6px;}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--line);}
+  .dot.active{background:var(--clay);}
+  .footer-btns{display:flex;gap:10px;}
+  .cta-back{background:transparent;border:1px solid var(--line);color:var(--ink-soft);font-size:14px;padding:11px 18px;cursor:pointer;}
+  .cta-back:hover{border-color:var(--ink-soft);}
+  .cta-quiz{background:var(--ochre);color:var(--ink);border:none;font-weight:500;font-size:14px;padding:11px 20px;cursor:pointer;}
+  .cta-quiz:hover{background:#C7962A;}
+  .cta-quiz:disabled{opacity:0.5;cursor:not-allowed;}
+
+  .results-sub{font-size:14px;color:var(--ink-soft);margin:-14px 0 28px;}
+  .results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .card{border:1px solid var(--line);background:var(--paper-raised);display:flex;flex-direction:column;}
+  .card-media{height:110px;background:repeating-linear-gradient(135deg,#E1E2D4 0px,#E1E2D4 8px,#DAD9C7 8px,#DAD9C7 16px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:12px;overflow:hidden;}
+  .card-media img{width:100%;height:100%;object-fit:cover;}
+  .card-body{padding:18px;display:flex;flex-direction:column;gap:10px;flex:1;}
+  .card-tag{align-self:flex-start;font-size:11px;color:var(--clay-dark);border:1px solid var(--clay);padding:3px 8px;}
+  .card-name{font-family:'Newsreader',serif;font-size:17px;line-height:1.25;}
+  .card-why{font-size:13px;color:var(--ink-soft);line-height:1.55;flex:1;}
+  .card-why b{color:var(--ink);font-weight:500;}
+  .card-meta{display:flex;justify-content:space-between;align-items:center;font-size:13px;}
+  .price{font-family:'Newsreader',serif;font-size:17px;}
+  .rating{color:var(--ink-soft);}
+  .cta-shop{display:block;text-align:center;background:var(--pine);color:var(--paper-raised);font-size:13px;font-weight:500;padding:11px;text-decoration:none;margin-top:2px;}
+  .cta-shop:hover{background:#243B31;}
+
+  .restart-row{margin-top:28px;}
+  .cta-restart{background:transparent;border:1px solid var(--line);color:var(--ink-soft);font-size:13px;padding:9px 16px;cursor:pointer;}
+  .cta-restart:hover{border-color:var(--ink-soft);}
+
+  .state-box{border:1px solid var(--line);background:var(--paper-raised);padding:40px;text-align:center;color:var(--ink-soft);font-size:14px;}
+  .state-box.error{color:var(--danger);border-color:var(--danger);}
+
+  .disclosure{border-top:1px solid var(--line);padding:22px 0 0;font-size:12.5px;color:var(--ink-soft);line-height:1.6;max-width:60ch;margin-top:8px;}
+
+  .hidden{display:none !important;}
+
+  @media (max-width:720px){
+    .results-grid{grid-template-columns:1fr;}
+    .hero h1{font-size:32px;}
+    .quiz-card{padding:22px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav>
+    <div class="wordmark">Fetchwell</div>
+    <div class="navlinks"><span>Dogs</span><span>Cats</span><span>How matching works</span></div>
+  </nav>
+
+  <section class="hero" id="hero">
+    <h1>Stop guessing what your pet actually needs.</h1>
+    <p>Answer four quick questions about your dog or cat. We match you to specific products — and tell you exactly why each one fits, before you spend a cent.</p>
+    <button class="cta-primary" id="start-btn">Find my pet's match →</button>
+  </section>
+
+  <section class="quiz-section" id="quiz-section">
+    <div class="eyebrow-row">
+      <h2 id="quiz-title">Tell us about your pet</h2>
+      <div class="step-count" id="step-count">Question 1 of 4</div>
+    </div>
+    <div class="quiz-card">
+      <div class="quiz-q" id="quiz-q"></div>
+      <div class="options" id="quiz-options"></div>
+      <div class="error-msg" id="quiz-error">Pick an option to continue.</div>
+      <div class="quiz-footer">
+        <div class="dots" id="quiz-dots"></div>
+        <div class="footer-btns">
+          <button class="cta-back hidden" id="back-btn">Back</button>
+          <button class="cta-quiz" id="next-btn">Next question</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="results-section hidden" id="results-section">
+    <div class="eyebrow-row">
+      <h2 id="results-title">Your matches</h2>
+    </div>
+    <div class="results-sub hidden" id="results-sub"></div>
+    <div class="results-grid" id="results-grid"></div>
+    <div class="state-box hidden" id="loading-state">Finding matches…</div>
+    <div class="state-box hidden" id="empty-state">
+      No close matches in our current catalog for that exact combination — showing our top general picks for your pet instead.
+    </div>
+    <div class="state-box error hidden" id="error-state">
+      We couldn't load the product catalog right now. Please refresh and try again.
+    </div>
+    <div class="restart-row">
+      <button class="cta-restart" id="restart-btn">Start over</button>
+    </div>
+    <div class="disclosure">
+      Fetchwell earns a commission when you buy through some of these links — it doesn't change what we recommend or the price you pay. Matches are based on what you tell us, not on which retailer pays the most.
+    </div>
+  </section>
+
+</div>
+
+<script>
+  var questions = [
+    {
+      key: 'pet', q: "What's your pet?",
+      options: [
+        {v:'dog', label:'Dog'},
+        {v:'cat', label:'Cat'}
+      ]
+    },
+    {
+      key: 'stage', q: "What life stage are they at?",
+      options: [
+        {v:'young', label:'Puppy / kitten'},
+        {v:'adult', label:'Adult'},
+        {v:'senior', label:'Senior'}
+      ]
+    },
+    {
+      key: 'concern', q: "What's the main thing you're trying to solve right now?",
+      options: [
+        {v:'stomach', label:'Sensitive stomach'},
+        {v:'weight', label:'Weight management'},
+        {v:'joint', label:'Joint support'},
+        {v:'picky', label:'Picky eater'},
+        {v:'coat', label:'Shedding / coat'},
+        {v:'essentials', label:'Just browsing essentials'}
+      ]
+    },
+    {
+      key: 'budget', q: "What's your budget for this?",
+      options: [
+        {v:'budget', label:'Keep it affordable'},
+        {v:'mid', label:'Mid-range is fine'},
+        {v:'premium', label:'Willing to pay for quality'}
+      ]
+    }
+  ];
+
+  var answers = {};
+  var currentQ = 0;
+
+  // ---- Load products from the Airtable-backed API as soon as the page opens,
+  // so they're almost certainly ready by the time the user finishes the quiz. ----
+  var productsPromise = fetch('/api/products')
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.error) throw new Error(data.error);
+      return data.products || [];
+    });
+
+  var quizSection = document.getElementById('quiz-section');
+  var heroSection = document.getElementById('hero');
+  var resultsSection = document.getElementById('results-section');
+  var quizTitle = document.getElementById('quiz-title');
+  var stepCount = document.getElementById('step-count');
+  var quizQ = document.getElementById('quiz-q');
+  var quizOptions = document.getElementById('quiz-options');
+  var quizError = document.getElementById('quiz-error');
+  var quizDots = document.getElementById('quiz-dots');
+  var backBtn = document.getElementById('back-btn');
+  var nextBtn = document.getElementById('next-btn');
+
+  function renderDots(){
+    quizDots.innerHTML = '';
+    for(var i=0;i<questions.length;i++){
+      var d = document.createElement('div');
+      d.className = 'dot' + (i <= currentQ ? ' active' : '');
+      quizDots.appendChild(d);
+    }
+  }
+
+  function renderQuestion(){
+    var qdef = questions[currentQ];
+    quizQ.textContent = qdef.q;
+    stepCount.textContent = 'Question ' + (currentQ+1) + ' of ' + questions.length;
+    quizOptions.innerHTML = '';
+    quizError.classList.remove('show');
+
+    qdef.options.forEach(function(opt){
+      var el = document.createElement('div');
+      el.className = 'opt' + (answers[qdef.key] === opt.v ? ' selected' : '');
+      el.textContent = opt.label;
+      el.addEventListener('click', function(){
+        answers[qdef.key] = opt.v;
+        quizError.classList.remove('show');
+        renderQuestion();
+      });
+      quizOptions.appendChild(el);
+    });
+
+    backBtn.classList.toggle('hidden', currentQ === 0);
+    nextBtn.textContent = currentQ === questions.length - 1 ? 'See my matches' : 'Next question';
+    renderDots();
+  }
+
+  document.getElementById('start-btn').addEventListener('click', function(){
+    heroSection.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  backBtn.addEventListener('click', function(){
+    if(currentQ > 0){ currentQ--; renderQuestion(); }
+  });
+
+  nextBtn.addEventListener('click', function(){
+    var qdef = questions[currentQ];
+    if(!answers[qdef.key]){
+      quizError.classList.add('show');
+      return;
+    }
+    if(currentQ < questions.length - 1){
+      currentQ++;
+      renderQuestion();
+    } else {
+      showResults();
+    }
+  });
+
+  document.getElementById('restart-btn').addEventListener('click', function(){
+    answers = {};
+    currentQ = 0;
+    resultsSection.classList.add('hidden');
+    quizSection.classList.remove('hidden');
+    renderQuestion();
+    quizSection.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  function scoreProduct(p){
+    var score = 0;
+    if(p.pet !== answers.pet) return -1;
+    if(p.stages.indexOf(answers.stage) === -1) return -1;
+    if(p.concerns.indexOf(answers.concern) !== -1) score += 3;
+    if(p.budget.indexOf(answers.budget) !== -1) score += 1;
+    return score;
+  }
+
+  function setResultState(state){
+    // state: 'loading' | 'results' | 'error'
+    document.getElementById('loading-state').classList.toggle('hidden', state !== 'loading');
+    document.getElementById('error-state').classList.toggle('hidden', state !== 'error');
+    document.getElementById('results-grid').classList.toggle('hidden', state !== 'results');
+  }
+
+  function showResults(){
+    quizSection.classList.add('hidden');
+    resultsSection.classList.remove('hidden');
+    document.getElementById('results-sub').classList.add('hidden');
+    document.getElementById('empty-state').classList.add('hidden');
+    document.getElementById('results-grid').innerHTML = '';
+    setResultState('loading');
+    resultsSection.scrollIntoView({behavior:'smooth', block:'start'});
+
+    productsPromise.then(function(products){
+      renderMatches(products);
+    }).catch(function(){
+      setResultState('error');
+    });
+  }
+
+  function renderMatches(products){
+    var scored = products
+      .map(function(p){ return {p:p, score:scoreProduct(p)}; })
+      .filter(function(s){ return s.score >= 0; })
+      .sort(function(a,b){ return b.score - a.score; });
+
+    var strongMatches = scored.filter(function(s){ return s.score >= 3; });
+    var shown = strongMatches.length ? strongMatches.slice(0,3) : scored.slice(0,3);
+
+    document.getElementById('empty-state').classList.toggle('hidden', strongMatches.length > 0 || shown.length === 0);
+
+    var petLabel = answers.pet === 'dog' ? 'dog' : 'cat';
+    var stageLabel = {young:'young', adult:'adult', senior:'senior'}[answers.stage];
+    var concernLabel = (questions[2].options.filter(function(o){return o.v===answers.concern;})[0] || {}).label || '';
+
+    document.getElementById('results-title').textContent = 'Matches for your ' + stageLabel + ' ' + petLabel;
+    var resultsSub = document.getElementById('results-sub');
+    resultsSub.textContent = shown.length + ' of ' + scored.length + ' possible matches · focused on: ' + concernLabel.toLowerCase();
+    resultsSub.classList.remove('hidden');
+
+    var grid = document.getElementById('results-grid');
+    grid.innerHTML = '';
+
+    if (shown.length === 0) {
+      setResultState('results'); // grid stays empty; empty-state box explains why
+      return;
+    }
+
+    shown.forEach(function(item, idx){
+      var p = item.p;
+      var tag = idx === 0 ? 'Best fit' : (idx === 1 ? 'Good fit' : 'Worth a look');
+      var media = p.imageUrl
+        ? '<img src="' + p.imageUrl + '" alt="' + p.name + '">'
+        : 'product photo';
+      var card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML =
+        '<div class="card-media">' + media + '</div>' +
+        '<div class="card-body">' +
+          '<div class="card-tag">' + tag + '</div>' +
+          '<div class="card-name">' + p.name + '</div>' +
+          '<div class="card-why"><b>Why it matches:</b> ' + p.why + '</div>' +
+          '<div class="card-meta"><span class="price">' + p.price + '</span><span class="rating">' + p.rating + '</span></div>' +
+          '<a class="cta-shop" href="' + p.affiliateUrl + '" target="_blank" rel="noopener sponsored">Shop on ' + p.retailer + '</a>' +
+        '</div>';
+      grid.appendChild(card);
+    });
+
+    setResultState('results');
+  }
+
+  renderQuestion();
+</script>
+</body>
+</html>
